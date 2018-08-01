@@ -1,79 +1,49 @@
-# cf_jwt
+# Coldfusion JWT Library
 
 A ColdFusion CFC to manage the encoding and decoding of JWTs (JSON Web Tokens)
 
-[![cfmlbadges](https://cfmlbadges.monkehworks.com/images/badges/tested-with-testbox.svg)](https://cfmlbadges.monkehworks.com)
-[![cfmlbadges](https://cfmlbadges.monkehworks.com/images/badges/compatibility-coldfusion-9.svg)](https://cfmlbadges.monkehworks.com)
-[![cfmlbadges](https://cfmlbadges.monkehworks.com/images/badges/compatibility-coldfusion-10.svg)](https://cfmlbadges.monkehworks.com)
-[![cfmlbadges](https://cfmlbadges.monkehworks.com/images/badges/compatibility-lucee-45.svg)](https://cfmlbadges.monkehworks.com)
-[![cfmlbadges](https://cfmlbadges.monkehworks.com/images/badges/compatibility-lucee-5.svg)](https://cfmlbadges.monkehworks.com)
-
 ## Getting Started
 
-Instantiate the component and pass in the required properties like so:
+Example usage (using CFM):
 
-```
-var secretKey = createUUID();
-var clientId  = 'BF23473E-A6AA-477D-ADDEB3A6DC24D28E';
-var issuer    = 'https://test.monkehserver.com/oauth/token';
+```coldfusion
+<cfset APPLICATION.jwt.init('secretkey')>
+<cfset payload = structNew()>
+<cfset payload["iat"] = DateDiff("s", DateConvert("utc2Local", "January 1 1970 00:00"), now())>
+<cfset payload["exp"] = DateDiff("s", DateConvert("utc2Local", "January 1 1970 00:00"), dateAdd('s', 15, now()))>
+<cfset payload["mydata"] = "Data goes here!">
 
-var oCFJWT = new cf_jwt(
-	secretKey = secretKey,
-	issuer    = issuer,
-	audience  = clientId
-);
-```
+<!--- The encoded token (returns string) --->
+<cfset encodedToken = APPLICATION.jwt.encode(payload: payload)>
 
-You then need to build your payload and send it to be encoded:
+<!--- The decoded token (returns CFML data) --->
+<cftry>
+    <cfset decodedToken = APPLICATION.jwt.decode(token: encodedToken)>
+    <cfcatch>
+        <cfoutput>ERROR! #cfcatch.type# - #cfcatch.message#</cfoutput>
+    <cfcatch>
+</cftry>
 
-```
-var payload = {
-	"sub"  : 1000,
-	"iss"  : issuer,
-	"aud"  : clientId,
-	"iat"  : 1470002703,
-	"exp"  : 1602839647,
-	"scope": "read write"
-};
-
-var sEncode = oCFJWT.encode( payload );
+<!--- The verification of the token (returns true / false) --->
+<cfset verifyToken = APPLICATION.jwt.verify(token: encodedToken)>
 ```
 
-The above payload example uses the same `issuer` and `clientId` value being sent through to the `CF_JWT` object. These are used for validation within the object to ensure the values set are the same contained within the payload.
-
-`sEncode` contains the JSON Web Token string value.
-
-To decode the JWT string, simply pass it through like so:
-
-```
-var stuDecodedData = oCFJWT.decode( sEncode );
-```
-
+In the example above, the JWT library was initialized using `cfobject` to `APPLICATION.jwt`. There are examples how to encode, decode and verify the JSON Web Token.
 
 Testing
 ----------------
-The component has been tested on Adobe ColdFusion 9 and 10, Lucee 4.5 and Lucee 5.
+The component has been tested on Adobe ColdFusion 10 as for now. Currently the testbox is not being updated/used by me.
 
 
 Thanks
 ----------------
 
-This component is based upon the original https://github.com/jsteinshouer/cf-jwt-simple
-
-
-Download
-----------------
-[CF JWT](https://github.com/coldfumonkeh/cf_jwt/downloads)
-
-
-### 1.0.0 - October 16, 2017
-
-- Commit: Initial Release
+This component is based upon the original https://github.com/jsteinshouer/cf-jwt-simple and forked from https://github.com/coldfumonkeh/cf_jwt
 
 
 MIT License
 
-Copyright (c) 2012 Matt Gifford (Monkeh Works Ltd)
+Copyright (c) 2018 Yusof Firdaus
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
